@@ -5,7 +5,9 @@ dotenv.config();
 class Redis {
   static instance;
 
-  static counter;
+  static counter; // this is the counter for the number of users
+
+  // Loader function to connect to redis before starting the server
   static loader = async () => {
     try {
       const client = createClient({
@@ -30,6 +32,7 @@ class Redis {
     }
   };
 
+  // Function to get the counter
   static getCounter = async () => {
     const counter = await Redis.instance.get("counter");
 

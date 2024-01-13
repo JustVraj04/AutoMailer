@@ -22,6 +22,7 @@ class GoogleOAuthServices {
     process.env.GOOGLE_REDIRECT_URI
   );
 
+  // Function to get the auth url
   static getAuthURL = async () => {
     const url = GoogleOAuthServices.oauth2Client.generateAuthUrl({
       access_type: "offline",
@@ -31,6 +32,7 @@ class GoogleOAuthServices {
     return url;
   };
 
+  // Function to create the tokens from the code
   static getTokens = async (code) => {
     try {
       const token = await GoogleOAuthServices.oauth2Client.getToken(code);
@@ -59,6 +61,7 @@ class GoogleOAuthServices {
     }
   };
 
+  // Function to save the tokens in the redis db
   static saveTokens = async (tokens) => {
     let userCount = await Redis.instance.get("counter");
     const key = `user:${userCount}`;
@@ -70,6 +73,7 @@ class GoogleOAuthServices {
     return;
   };
 
+  // Function to get the tokens from the redis db
   static getTokenFromDB = async () => {
     const usersCounter = await Redis.instance.get("counter");
 
@@ -84,6 +88,7 @@ class GoogleOAuthServices {
     return users;
   };
 
+  // Function to sign out a user and delete the tokens from the redis db
   static signOut = async (email) => {
     let usersCounter = await Redis.instance.get("counter");
     let userFound;

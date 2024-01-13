@@ -2,6 +2,7 @@ import Gmail from "../gmail/mail.js";
 import GoogleOAuthServices from "../googleAuth/oauth2.js";
 import Redis from "../../redis.js";
 class AutoReply {
+  // Function to check if there are any users in the database
   static check = async () => {
     const users = await GoogleOAuthServices.getTokenFromDB();
     if (users.length === 0) {
@@ -20,7 +21,6 @@ class AutoReply {
     // 1. Get all the users from the database
     // 2. For each user, start the auto reply service simultaneously
     // 3. If there are no users, log a message
-    // 4. Continue to check for new users every 5 minutes and start the auto reply service for them
 
     console.log("Starting auto reply for all users");
 
@@ -41,11 +41,13 @@ class AutoReply {
     console.log("Done auto reply for all users");
   };
 
+  // Function to start the auto reply service for a user
   static autoReplyService = async (accountDetails, config) => {
     console.log(
-      `   [${accountDetails?.email}] > Auto reply service started...`
+      `   [${accountDetails?.email}] : Auto reply service started...`
     );
 
+    // Generate a random delay between minInterval and maxInterval
     const delay =
       Math.floor(
         Math.random() * (config.maxInterval - config.minInterval + 1) +
@@ -53,53 +55,54 @@ class AutoReply {
       ) * 1000;
 
     console.log(
-      `   [${accountDetails?.email}] > interval = ${delay / 1000} sec`
+      `   [${accountDetails?.email}] : interval = ${delay / 1000} sec`
     );
 
     const { refreshToken, email } = accountDetails;
 
     if (!email) {
       console.log(
-        `   [${accountDetails?.email}] > [skip] User email not found!`
+        `   [${accountDetails?.email}] : [skip] User email not found!`
       );
       return;
     }
 
     try {
       // check if lables exists, if not create one
-      // why this logic here? to avoid race condition inside loop
       console.log(
-        `   [${accountDetails?.email}] > checking label availability`
+        `   [${accountDetails?.email}] : checking label availability`
       );
       let label = await Gmail.getLabelDetails(config.labelName, refreshToken);
 
       if (!label) {
-        console.log(`   [${accountDetails?.email}] > label not found!`);
-        console.log(`   [${accountDetails?.email}] > creating label`);
+        console.log(`   [${accountDetails?.email}] : label not found!`);
+        console.log(`   [${accountDetails?.email}] : creating label`);
         label = await Gmail.createLabel(config.labelName, refreshToken);
       }
 
+      // start auto reply
       while (true) {
         await this.replyingToEmails(email, refreshToken, label, config);
-        console.log(`   [${accountDetails?.email}] > done!\n\n`);
+        console.log(`   [${accountDetails?.email}] : done!\n\n`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     } catch (err) {
-      console.log(`> Auto Reply Service <${accountDetails.email}>\n`, err);
+      console.log(`: Auto Reply Service <${accountDetails.email}>\n`, err);
     }
   };
 
+  // Function to reply to emails
   static async replyingToEmails(emailId, refreshToken, labelDetails, config) {
-    console.log(`       [${emailId}] >Reading email threads`);
+    console.log(`       [${emailId}] :Reading email threads`);
 
     const threads = await Gmail.getEmailThreads(refreshToken);
-    console.log(`       [${emailId}] >Threads found: ${threads.length}`);
+    console.log(`       [${emailId}] :Threads found: ${threads.length}`);
 
     const replyActionPromises = threads.map(async (thread) => {
       if (!thread.id) return false;
 
       console.log(
-        `       [${emailId}] >[Thread ${thread.id}] Getting messages`
+        `       [${emailId}] :[Thread ${thread.id}] Getting messages`
       );
       const threadDetails = await Gmail.GetThreadDetails(
         thread.id,
@@ -112,13 +115,13 @@ class AutoReply {
 
       if (threadLabels?.includes(config.labelName)) {
         console.log(
-          `       [${emailId}] >[Thread ${thread.id}] Already replied! Skipping!`
+          `       [${emailId}] :[Thread ${thread.id}] Already replied! Skipping!`
         );
         return false;
       }
 
       console.log(
-        `       [${emailId}] >[Thread ${thread.id}] Checking prior response`
+        `       [${emailId}] :[Thread ${thread.id}] Checking prior response`
       );
       const hasPriorReplies = Gmail.CheckIfRespoded(
         threadDetails,
@@ -126,14 +129,14 @@ class AutoReply {
       );
 
       if (!hasPriorReplies) {
-        console.log(`       [${emailId}] >[Thread ${thread.id}] Sending reply`);
+        console.log(`       [${emailId}] :[Thread ${thread.id}] Sending reply`);
         await Gmail.SendReplyToThread(
           emailId || "",
           threadDetails,
           refreshToken
         );
 
-        console.log(`       [${emailId}] >[Thread ${thread.id}] Adding label`);
+        console.log(`       [${emailId}] :[Thread ${thread.id}] Adding label`);
 
         if (!labelDetails) return false;
         await Gmail.setThreadLabel(labelDetails, threadDetails, refreshToken);

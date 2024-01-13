@@ -43,7 +43,6 @@ class GoogleOAuthController {
       await GoogleOAuthServices.getTokenFromDB(email);
 
       res.status(200);
-      //   res.status(200).json({ token });
     } catch (error) {
       console.log(error);
       res.status(500).json({ error });
@@ -57,12 +56,10 @@ class GoogleOAuthController {
       const user = await GoogleOAuthServices.signOut(email);
 
       if (!user.email) {
-        res
-          .status(404)
-          .json({
-            error:
-              "Either provided email not found or already removed from database",
-          });
+        res.status(404).json({
+          error:
+            "Either provided email not found or already removed from database",
+        });
       } else {
         res.status(200).json({ message: "User removed successfully" });
       }

@@ -9,6 +9,7 @@ class GMail {
 
   static oauth2Client = GoogleOAuthServices.oauth2Client;
 
+  // Function to get all the unread threads
   static getEmailThreads = async (refreshToken) => {
     this.oauth2Client.setCredentials({ refresh_token: refreshToken });
 
@@ -22,6 +23,7 @@ class GMail {
     return foundThreads.data.threads || [];
   };
 
+  // Function to get the thread details
   static GetThreadDetails = async (threadId, refreshToken) => {
     this.oauth2Client.setCredentials({ refresh_token: refreshToken });
 
@@ -34,6 +36,7 @@ class GMail {
     return foundThreadDetails.data;
   };
 
+  // Function to check if the email has been replied to
   static CheckIfRespoded = (thread, emailId) => {
     return thread.messages?.some((message) =>
       message.payload?.headers?.some(
@@ -44,6 +47,7 @@ class GMail {
     );
   };
 
+  // Function to get the email sender
   static GetEmailSender = (thread) => {
     if (!thread.messages) return null;
 
@@ -52,6 +56,7 @@ class GMail {
     )?.value;
   };
 
+  // Function to get the thread subject
   static GetThreadSubject = (thread) => {
     if (!thread.messages) return null;
 
@@ -60,6 +65,7 @@ class GMail {
     )?.value;
   };
 
+  // Function to send the reply to the thread
   static SendReplyToThread = async (senderEmailId, thread, refreshToken) => {
     if (!thread.messages) {
       console.log("Empty thread provided");
@@ -87,6 +93,7 @@ class GMail {
     });
   };
 
+  // Function to get the label details
   static getLabelDetails = async (lableName, refreshToken) => {
     this.oauth2Client.setCredentials({ refresh_token: refreshToken });
 
@@ -105,6 +112,7 @@ class GMail {
     return label;
   };
 
+  // Function to create the label
   static createLabel = async (labelName, refreshToken) => {
     this.oauth2Client.setCredentials({ refresh_token: refreshToken });
 
@@ -121,6 +129,7 @@ class GMail {
     return createdLable.data;
   };
 
+  // Function to set the thread label
   static setThreadLabel = async (label, thread, refreshToken) => {
     this.oauth2Client.setCredentials({ refresh_token: refreshToken });
 

@@ -7,6 +7,7 @@ dotenv.config();
 
 const eventEmitter = new EventEmitter();
 
+// start auto reply for all users
 eventEmitter.on(`start_autoreply`, () => {
   AutoReply.autoReplyForAll();
 });
@@ -18,6 +19,7 @@ eventEmitter.on(`start_autoreply`, () => {
   server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 
+    // Doing this to avoid not being able to use other routes
     eventEmitter.emit(`start_autoreply`);
   });
 })().catch((err) => {

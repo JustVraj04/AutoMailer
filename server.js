@@ -13,6 +13,7 @@ const bootstrap = async () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
+  // connect to redis
   await Redis.loader();
 
   app.use("/google/oauth", OAuthRoutes);
@@ -27,10 +28,11 @@ const bootstrap = async () => {
       You can close this tab now. \n 
       we will send you an email from your account until you remove your account from AutoMailer by going to this link: \n http://localhost:${
         process.env.PORT || 3000
-      }/google/oauth/signout`
+      }/google/oauth/signout?email="Your_email"`
     );
   });
 
+  // health check
   app.get(
     "/health",
     StatusMonitor({

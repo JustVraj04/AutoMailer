@@ -17,6 +17,11 @@ Assignment for Backend intern position in OpeninApp
    To run in Production environment:
    Run `node index.js` or `yarn start` or `npm run start`
 
+## APIs:
+
+1. SignIn API: /google/oauth/signIn
+2. SignOut API: /google/oauth/signout?email=YourEmail
+
 ### Difficulties:
 
 1. Handling web requests while continuosly checking for emails in gmail account
